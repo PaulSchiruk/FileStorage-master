@@ -1,0 +1,23 @@
+﻿@model IEnumerable<MvcApp.Models.FilesModels.ComponentViewModel>
+
+@Html.FilesTableContent(Model)
+
+@*@foreach (MvcApp.Models.FilesModels.ComponentViewModel file in Model)
+{
+    <tr class="cursor-pointer @(file.ContentType == "folder" ? "folder" : string.Empty) " id="@file.Id">
+        <td>
+            @if (file.ContentType == "folder")
+            {
+                <span class="glyphicon glyphicon-folder-open"></span>
+            }
+            @file.Name
+        </td>
+        <td>
+            @file.DateUploaded.ToLongDateString()
+            @file.DateUploaded.ToLongTimeString()
+        </td>
+        <td>
+            @String.Format(new MvcApp.Infrastructure.Formatters.MemorySizeFormatter(), "{0:memory}", file.Size)
+        </td>
+    </tr>
+}*@

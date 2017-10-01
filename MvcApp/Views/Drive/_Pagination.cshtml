@@ -1,0 +1,10 @@
+﻿@model Int32
+<li class="active cursor-pointer" id="page_1">
+    <a class="page-number cursor-pointer">1</a>
+</li>
+@for (int i = 2; i <= Model; i++)
+{
+    <li id='page_@i'>
+        <a class="page-number cursor-pointer">@i</a>
+    </li>
+}

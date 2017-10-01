@@ -1,0 +1,35 @@
+﻿<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("Index", "Home")"><span class="glyphicon glyphicon-home"></span> Homepage</a>
+            </li>
+            <li>
+                <a href="@Url.Action("UserFiles","Drive")"><span class="glyphicon glyphicon-list"></span> All your files</a>
+            </li>
+            
+            <li>
+                <a href="@Url.Action("UploadNewFile", "Drive")"><span class="glyphicon glyphicon-cloud-upload"></span> Upload new file</a>
+            </li>
+            <li>
+                <a href="#"><span class="glyphicon glyphicon-info-sign"></span> About</a>
+            </li>
+        </ul>
+    </div>
+    <span class="glyphicon glyphicon-menu-hamburger cursor-pointer" id="menu-toggle"></span>
+</div>
+<link href="~/Content/simple-sidebar.css" rel="stylesheet" />
+<script>
+    $("#menu-toggle").click(function (e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+
+    $(document).click(function (event) {
+        if (!$(event.target).closest('#sidebar-wrapper').length && !$(event.target).closest('#menu-toggle').length) {
+            
+            $("#wrapper").removeClass("toggled");
+        }
+    })
+</script>

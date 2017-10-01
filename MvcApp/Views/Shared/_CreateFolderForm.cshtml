@@ -1,0 +1,10 @@
+﻿@model int?
+
+@Html.AntiForgeryToken()
+<legend class="text-center">You almost created a folder</legend>
+<div class="form-group">
+    <div class="col-sm-9">
+        @Html.TextBox("name", "", new { @class = "form-control", placeholder="Folder name" })
+    </div>
+    @Html.Hidden("rootFolderId", Model)
+</div>

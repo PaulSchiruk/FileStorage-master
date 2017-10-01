@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "AddNewFolder";
+}
+@section Body{
+    @using (Html.BeginForm("AddNewFolder", "Folder", FormMethod.Post, new { @class = "form-horizontal" }))
+    {
+
+        <div class="col-sm-offset-3 col-sm-6">
+            <div class="form-group">
+                @Html.Partial("_CreateFolderForm", (int?)ViewBag.RootFolderId)
+             
+                <input type="submit" value="Create" class="btn btn-success btn-lg" />
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,235 @@
+﻿@model IEnumerable<MvcApp.Models.FilesModels.ComponentViewModel>
+@{
+    ViewBag.Title = "My files";
+}
+@section Body{
+    <div class="col-md-8 col-md-offset-2">
+        <div class="col-md-6 col-md-offset-6">
+            <div class="pull-right">
+                <a target="_blank" href="#" class="no-style-link" id="downloadFile"><h4 class="glyphicon glyphicon-save cursor-pointer"></h4></a>
+                <h4 class="glyphicon glyphicon-trash no-style-link" onclick="deleteFile()"></h4>
+                <a id="createFolderLink" href="@Url.Action("AddNewFolder", "Folder", new { rootFolderId = ViewBag.RootFolderId })"><img src="~/Content/Images/add_folder.png" class="icon to-style-link" /></a>
+                |
+                <h4 id="cut" class="glyphicon glyphicon-scissors inactive" onclick="cutFile()"></h4>
+                <h4 id="paste" class="glyphicon glyphicon-paste inactive" onclick="pasteFile()"></h4>
+            </div>
+        </div>
+        <h3 class="text-center">Files stored at your disk</h3>
+        <div class="col-md-6">
+            <div class="pull-left">
+                <h4 class="btn btn-default glyphicon glyphicon-circle-arrow-left" onclick="goBack()"></h4>
+            </div>
+        </div>
+        <div class="panel panel-default panel-body">
+            @if (Model.Count() == 0)
+            {
+                @Html.Partial("_NoFilesUploaded");
+            }
+            else
+            {
+                <table class="table" id="contentTable">
+                    <thead>
+                        <tr>
+                            <td>
+                                <b>Name</b>
+                            </td>
+                            <td>
+                                <b>Date uploaded</b>
+                            </td>
+                            <td>
+                                <b>Size</b>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="page">
+                        @Html.Partial("_PageWithFiles", Model)
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">
+                                <ul class="pagination">
+                                    @Html.Partial("_Pagination", (int)ViewBag.NumberOfPages)
+                                </ul>
+
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            }
+        </div>
+    </div>
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" id="createFolderModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body container-fluid">
+                    <div class="col-sm-12">
+
+                        @Html.Partial("_CreateFolderForm", new ViewDataDictionary((int?)ViewBag.RootFolderId))
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="createFolder()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+}
+@section Scripts{
+    <script>
+        var selectedFileId = null;
+        var selectedFolderId = null;
+
+        var currentFolderId = null;
+        var fileToCutId = null;
+
+        var activate = function (id) {
+            $('#' + id).removeClass('inactive');
+            $('#' + id).addClass('cursor-pointer');
+
+        }
+
+        var passivate = function (id) {
+            $('#' + id).addClass('inactive');
+            $('#' + id).removeClass('cursor-pointer');
+        }
+
+        var registerPaginationClick = function () {
+            $(this).parent().addClass('active').siblings().removeClass('active');
+            var page = parseInt($(this).html()) - 1;
+
+            $.ajax({
+                url: '@Url.Action("GetPage", "Drive")',
+                data: { "pageNumber": page, "rootFolderId": currentFolderId },
+                beforeSend: function () {
+
+                    $("#page").html(' <tr><td colspan="4"><img class="col-sm-offset-5" src="@Url.Content("~/Content/Images/loading.gif")" /> </td></tr>');
+                },
+                success: function (data) {
+                    $("#page").html(data);
+                    $(".folder").on("dblclick", registerFolderClick);
+                    passivate('cut');
+                }
+            });
+        };
+
+        var registerFolderClick = function () {
+            currentFolderId = $(this)[0].id;
+            updatePage(currentFolderId);
+        };
+
+        var updatePage = function (rootFolderId) {
+            passivate('cut');
+
+            $.ajax({
+                url: '@Url.Action("GetPage", "Drive")',
+                data: { "pageNumber": 0, "rootFolderId": rootFolderId },
+                success: function (data) {
+                    $.get('@Url.Action("GetPagination", "Drive")', { rootFolderId: rootFolderId }).success(function (response) {
+                        $('.pagination').html(response);
+
+                        $(".page-number").on("click", registerPaginationClick);
+                        $(".folder").on("dblclick", registerFolderClick)
+                    });
+
+                    $("#page").html(data);
+                }
+            });
+        }
+
+
+        var goBack = function () {
+            $("#page").html(' <tr><td colspan="4"><img class="col-sm-offset-5" src="@Url.Content("~/Content/Images/loading.gif")" /> </td></tr>');
+
+            $.get('@Url.Action("GetRootFolderId", "Folder")', { currentFolderId: currentFolderId })
+            .success(function (result) {
+                if (result == '') currentFolderId = null;
+                else currentFolderId = result;
+                updatePage(currentFolderId);
+            });
+        }
+
+        $('#createFolderLink').on('click', function (event) {
+            event.preventDefault();
+
+            $("#createFolderModal").modal();
+        });
+
+        var createFolder = function () {
+            $.post('@Url.Action("CreateFolder", "Folder")', { rootFolderId: currentFolderId, name: $('#name').val() })
+                .success(function () {
+                    $("#createFolderModal").modal('hide');
+                    updatePage(currentFolderId);
+                });
+        }
+
+        var cutFile = function () {
+            if (selectedFileId == null) return;
+            fileToCutId = selectedFileId;
+            activate('paste');
+        }
+
+        var pasteFile = function () {
+            if (fileToCutId == null) return;
+
+
+            $("#page").html(' <tr><td colspan="4"><img class="col-sm-offset-5" src="@Url.Content("~/Content/Images/loading.gif")" /> </td></tr>');
+            $.post('@Url.Action("MoveFile", "Drive")', { fileId: fileToCutId, destinationFolderId: currentFolderId }).success(function () {
+                updatePage(currentFolderId);
+                passivate('paste');
+                fileToCutId = null;
+            });
+        }
+
+        var deleteFile = function () {
+            if (selectedFileId == null && selectedFolderId == null) return;
+
+            $("#page").html(' <tr><td colspan="4"><img class="col-sm-offset-5" src="@Url.Content("~/Content/Images/loading.gif")" /> </td></tr>');
+
+            if (selectedFileId != null) {
+                $.post('@Url.Action("DeleteFile", "Drive")', { fileId: selectedFileId }).success(function () {
+                    updatePage(currentFolderId);
+                });
+            }
+            if (selectedFolderId != null) {
+                $.post('@Url.Action("DeleteFolder", "Folder")', { folderId: selectedFolderId }).success(function () {
+                    updatePage(currentFolderId);
+                });
+            }
+        }
+
+        $().ready(function () {
+            $(".page-number").on("click", registerPaginationClick);
+
+            $(".folder").on("dblclick", registerFolderClick);
+        });
+
+        $('#page').on('click', '.cursor-pointer', function (event) {
+
+            $(this).addClass('bg-primary').siblings().removeClass('bg-primary');
+
+            if ($(this).hasClass('folder')) {
+                $('#downloadFile').attr('href', '@Url.Action("NotRealized", "Drive")');
+                selectedFileId = null;
+                selectedFolderId = $(this)[0].id;
+                passivate('cut');
+            }
+
+            else {
+                activate('cut');
+                selectedFileId = $(this)[0].id;
+                selectedFolderId = null;
+                $('#downloadFile').attr('href', '@Url.Action("DownloadFile", "Drive")' + '?fileId=' + selectedFileId);
+            }
+        });
+
+    </script>
+}

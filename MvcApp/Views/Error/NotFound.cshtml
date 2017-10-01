@@ -1,0 +1,15 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Not found";
+}
+@section Header{}
+@section LeftMenu{}
+@section Body{
+    <link href="~/Content/error-page.css" rel="stylesheet" />
+    <div id="main">
+        <h1>404 :(</h1>
+        <p>The Page you are looking for doesn' exist.</p>
+        <p>You can return to main <a href="@Url.Action("UserFiles", "Drive")" style="color:white; font-weight:bold">here</a></p>
+    </div>
+}

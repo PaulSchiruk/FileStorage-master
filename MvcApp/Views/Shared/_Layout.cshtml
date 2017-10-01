@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryval")
+
+    @Styles.Render("~/Content/dropzonescss")
+    @Scripts.Render("~/bundles/dropzonescripts")
+</head>
+<body>
+
+    @if (IsSectionDefined("Header"))
+    {
+        @RenderSection("Header");
+    }
+    else
+    {
+        @RenderPage("_DefaultHeader.cshtml")
+    }
+    @if (IsSectionDefined("LeftMenu"))
+    {
+        @RenderSection("LeftMenu");
+    }
+    else
+    {
+        @RenderPage("_DefaultLeftMenu.cshtml")
+    }
+    @RenderSection("Body")
+
+    @if (IsSectionDefined("Scripts"))
+    {
+        @RenderSection("Scripts");
+    }
+    @*Проверка наличия секции Footer в текущем представлении*@
+
+</body>
+</html>

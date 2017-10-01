@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "UploadNewFile";
+}
+<div class="jumbotron">
+    <form action="~/Home/SaveUploadedFile" method="post" enctype="multipart/form-data" class="dropzone" id="dropzoneForm" style="width: 50px; background: none; border: none;">
+        <div class="fallback">
+            <input name="file" type="file" multiple />
+            <input type="submit" value="Upload" />
+        </div>
+    </form>
+</div>
+<script>
+    Dropzone.options.dropzoneForm = {
+        init: function () {
+            this.on("complete", function (data) {
+                var res = JSON.parse(data.xhr.responseText);
+            });
+        }
+    };
+</script>
+
+@section Body{
+    <div class="jumbotron">
+        <form action="@Url.Action("UploadFiles", "Drive")" method="post" enctype="multipart/form-data" class="dropzone dz-clickable custom-dropzone" id="dropzoneForm">
+            <div class="dz-message text-info">
+                Drop files here or click to upload.
+
+            </div>
+            <div class="fallback">
+                <span class="dz-message">Drop files here or click to choose files.</span>
+                <input name="file" type="file" multiple />
+                <input type="submit" value="Upload" />
+            </div>
+        </form>
+    </div>
+
+}
+@section Scripts{
+    <script>
+        Dropzone.options.dropzoneForm = {
+            maxFilesize: @ViewBag.MaxFileSize,
+            init: function () {
+                this.on("complete", function (data) {
+                    //var res = eval('(' + data.xhr.responseText + ')');
+                    var res = JSON.parse(data.xhr.responseText);
+                });
+            }
+        };
+    </script>
+}
